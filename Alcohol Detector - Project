@@ -1,0 +1,172 @@
+AIM:
+The "Alcohol Detector" project aims to develop a microcontroller-based system capable of accurately detecting alcohol vapors and LPG gas in the surrounding environment. 
+This project addresses the risks associated with alcohol abuse and potential LPG gas leaks in homes. By providing a reliable and cost-effective solution for monitoring 
+these concentrations, the project seeks to enhance safety and prevent hazards in domestic environments.
+
+COMPONENTS USED:
+The "Alcohol Detector" project utilizes the following components:
+- 8051 Microcontroller Kit: Acts as the central processing unit for data handling and control.
+- MQ-3 Gas Sensor (Alcohol and LPG): Detects changes in resistance when exposed to alcohol vapors and LPG gas.
+- LM2596 Step-Down Converter: Ensures stable voltage supply to the system.
+- 7.4V Battery Source: Provides power to the system.
+- Switch for Circuit Control: Enables manual control of the circuit.
+- LCD Display: Provides visual feedback by displaying messages/alerts.
+
+THEORY:
+The system operates based on the principle of the MQ-3 gas sensor, which exhibits a change in resistance in the presence of alcohol vapors and LPG gas. When alcohol or 
+LPG gas is detected, the sensor's resistance changes, and this data is sent to the 8051 microcontroller for processing. The LM2596 step-down converter ensures a stable 
+and regulated power supply to the system. The LCD display serves as an output interface to provide real-time feedback to the user. 
+
+ALGORITHM AND PROCESS INVOLVED:
+The algorithm for the "Alcohol Detector" project follows these steps: 
+1. Initialize the system and sensor.
+2. Read sensor data for alcohol and LPG gas concentrations.
+3. Process data using the 8051 microcontroller.
+4. Compare alcohol and LPG gas concentrations with predefined thresholds.
+5. If either concentration exceeds thresholds, trigger an alert.
+6. Display "Alcohol Detected" on the LCD display when alcohol is detected.
+
+CODE:
+org 0x00
+
+mov r1, #38H ; Initialize LCD
+call command
+mov r1, #0EH ; Display ON
+call command
+mov r1, #06H ; Increment cursor
+call command
+mov r1, #01H ; Clear screen
+call command
+
+start:
+    mov r2, #'A' ; Load 'A' character
+    mov r3, #'L' ; Load 'L' character
+    mov r4, #'C' ; Load 'C' character
+    mov r5, #'O' ; Load 'O' character
+    mov r6, #'H' ; Load 'H' character
+    mov r7, #'O' ; Load 'O' character
+    mov r8, #'L' ; Load 'L' character
+    mov r9, #' ' ; Load space character
+    mov r10, #'D' ; Load 'D' character
+    mov r11, #'E' ; Load 'E' character
+    mov r12, #'T' ; Load 'T' character
+    mov r13, #'E' ; Load 'E' character
+    mov r14, #'C' ; Load 'C' character
+    mov r15, #'T' ; Load 'T' character
+    mov r16, #'O' ; Load 'O' character
+    mov r17, #'R' ; Load 'R' character
+
+    call data1 ; Display 'A'
+    call data1 ; Display 'L'
+    call data1 ; Display 'C'
+    call data1 ; Display 'O'
+    call data1 ; Display 'H'
+    call data1 ; Display 'O'
+    call data1 ; Display 'L'
+    call data1 ; Display ' '
+    call data1 ; Display 'D'
+    call data1 ; Display 'E'
+    call data1 ; Display 'T'
+    call data1 ; Display 'E'
+    call data1 ; Display 'C'
+    call data1 ; Display 'T'
+    call data1 ; Display 'O'
+    call data1 ; Display 'R'
+
+    call checkGas ; Check for gas presence
+
+    jmp start ; Loop to continuously display "ALCOHOL DETECTOR"
+
+data1:
+    setb p1.2 ; Select Data Register
+    mov p0, r2 ; Send data to LCD
+    setb p1.0 ; Enable LCD
+    call delay ; Delay
+    clr p1.0 ; Disable LCD
+    ret
+
+delay:
+    mov r1, #255
+delay_loop:
+    mov r0, #255
+delay_inner:
+    djnz r0, delay_inner
+    djnz r1, delay_loop
+    ret
+
+command:
+    clr p1.2 ; Select Command Register
+    mov p0, r1 ; Send command to LCD
+    setb p1.0 ; Enable LCD
+    call delay ; Delay
+    clr p1.0 ; Disable LCD
+    ret
+
+checkGas:
+    mov p1.0, p2.1 ; Copy the value from gas sensor (connected to P2.1) to P1.0
+    cjne p1.0, #0, alcoholDetected ; If alcohol detected (P1.0 is 0), jump to alcoholDetected
+    jmp endCheckGas ; Jump to end of gas check
+alcoholDetected:
+    mov r2, #'A' ; Load 'A' character (Alcohol Detected)
+    call data1 ; Display 'A'
+    mov r2, #'l' ; Load 'l' character
+    call data1 ; Display 'l'
+    mov r2, #'c' ; Load 'c' character
+    call data1 ; Display 'c'
+    mov r2, #'o' ; Load 'o' character
+    call data1 ; Display 'o'
+    mov r2, #'h' ; Load 'h' character
+    call data1 ; Display 'h'
+    mov r2, #'o' ; Load 'o' character
+    call data1 ; Display 'o'
+    mov r2, #'l' ; Load 'l' character
+    call data1 ; Display 'l'
+    mov r2, #' ' ; Load space character
+    call data1 ; Display space
+    mov r2, #'D' ; Load 'D' character
+    call data1 ; Display 'D'
+    mov r2, #'e' ; Load 'e' character
+    call data1 ; Display 'e'
+    mov r2, #'t' ; Load 't' character
+    call data1 ; Display 't'
+    mov r2, #'e' ; Load 'e' character
+    call data1 ; Display 'e'
+    mov r2, #'c' ; Load 'c' character
+    call data1 ; Display 'c'
+    mov r2, #'t' ; Load 't' character
+    call data1 ; Display 't'
+    mov r2, #'e' ; Load 'e' character
+    call data1 ; Display 'e'
+    mov r2, #'d' ; Load 'd' character
+    call data1 ; Display 'd'
+    
+    setb p1.0 ; Turn on output LED at port 1.0
+    
+    jmp endCheckGas ; Jump to end of gas check
+endCheckGas:
+    ret
+
+OUTPUT:
+The "Alcohol Detector" system provides the following outputs:
+- Alerts are triggered (LED or buzzer activated) and "Alcohol Detected" displayed on the LCD when alcohol concentration exceeds predefined threshold.
+- The LCD display remains clear when no alcohol is detected.
+
+APPLICATIONS:
+The "Alcohol Detector" project has versatile applications, including:
+- Home Safety: Detecting alcohol vapors and LPG gas leaks in households to prevent potential hazards.
+- Public Safety: Ensuring safety in public places such as bars, restaurants, and events by monitoring alcohol concentration.
+- Industrial Safety: Detecting alcohol and LPG gas in industrial environments to prevent accidents and ensure worker safety.
+- Personal Use: Providing individuals with a portable device to monitor alcohol intake and detect alcohol vapors in personal spaces.
+- Households with LPG Gas: Particularly beneficial for households using LPG gas for cooking or heating, offering an additional safety measure against leaks.
+
+FUTURE SCOPE:
+Future enhancements for the "Alcohol Detector" project include:
+- Implementing wireless communication for remote monitoring and control.
+- Enhancing the user interface for easier interaction, such as adding a keypad for settings.
+- Adding data logging capabilities for long-term analysis and monitoring trends.
+
+CONCLUSION AND DISCUSSION:
+In conclusion, the "Alcohol Detector" project presents a reliable and efficient system for detecting alcohol vapors and LPG gas, addressing safety concerns in households.
+The accurate detection capabilities of the system, coupled with real-time alerts, contribute significantly to preventing hazards associated with alcohol abuse and LPG gas leaks.
+With versatile applications ranging from home safety to industrial use, the system offers a valuable tool for enhancing safety in diverse environments.
+
